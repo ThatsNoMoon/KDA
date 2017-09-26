@@ -51,6 +51,20 @@ jar {
     }
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.thatsnomoon'
+            artifactId 'KDA'
+            version project.version
+
+            artifact jar {
+                classifier ''
+            }
+        }
+    }
+}
+
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
