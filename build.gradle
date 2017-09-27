@@ -43,6 +43,10 @@ dependencies {
 
     testCompile 'org.apache.logging.log4j:log4j-core:2.8.2'
     testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.2'
+//    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-reflect"
+//    runtime "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    testRuntime "org.jetbrains.kotlin:kotlin-reflect"
 }
 
 jar {
@@ -66,9 +70,11 @@ publishing {
 }
 
 compileKotlin {
+    kotlinOptions.noReflect = "false"
     kotlinOptions.jvmTarget = "1.8"
 }
 compileTestKotlin {
+    kotlinOptions.noReflect = "false"
     kotlinOptions.jvmTarget = "1.8"
 }
 kotlin {

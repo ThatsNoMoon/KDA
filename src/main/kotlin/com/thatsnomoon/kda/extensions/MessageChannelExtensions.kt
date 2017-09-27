@@ -21,6 +21,7 @@ import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.entities.MessageEmbed
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 
 /**
  * Blocking function to send a message to this MessageChannel.
@@ -136,4 +137,10 @@ inline infix fun MessageChannel.sendEmbedAsync(init: EmbedBuilder.() -> Unit): K
     val builder = EmbedBuilder()
     builder.init()
     return sendMessage(MessageBuilder().setEmbed(builder.build()).build()).promisify()
+}
+
+fun MessageChannel.awaitMessages(count: Int = 1, timeoutMS: Long = -1, check: (MessageReceivedEvent) -> Boolean = {true}): KPromise<List<MessageReceivedEvent>> {
+    return this.jda.awaitEvent(MessageReceivedEvent::class.java, count, timeoutMS) {
+        it.channel.idLong == this@awaitMessages.idLong && check(it)
+    }
 }
