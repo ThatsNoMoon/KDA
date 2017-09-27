@@ -30,7 +30,6 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'maven-publish'
-apply plugin: 'maven'
 
 repositories {
     mavenCentral()
@@ -67,11 +66,9 @@ publishing {
 }
 
 compileKotlin {
-    kotlinOptions.noReflect = "false"
     kotlinOptions.jvmTarget = "1.8"
 }
 compileTestKotlin {
-    kotlinOptions.noReflect = "false"
     kotlinOptions.jvmTarget = "1.8"
 }
 kotlin {
