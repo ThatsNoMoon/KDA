@@ -148,7 +148,7 @@ inline infix fun MessageChannel.sendEmbedAsync(init: EmbedBuilder.() -> Unit): K
  * @return A KPromise that resolves to a non-null, possibly empty list of received messages that passed the check before the timeout elapsed.
  */
 fun MessageChannel.awaitMessages(count: Int = 1, timeoutMS: Long = -1, check: (MessageReceivedEvent) -> Boolean = {true}): KPromise<List<MessageReceivedEvent>> {
-    return this.jda.awaitEvent(MessageReceivedEvent::class.java, count, timeoutMS) {
+    return this.jda.awaitEvents(MessageReceivedEvent::class.java, count, timeoutMS) {
         it.channel.idLong == this@awaitMessages.idLong && check(it)
     }
 }

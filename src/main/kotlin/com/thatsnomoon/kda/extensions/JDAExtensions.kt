@@ -34,11 +34,11 @@ import kotlin.coroutines.experimental.CoroutineContext
  *
  * @return A KPromise of a list of the events collected that passed the check function and were received before the timeout elapsed.
  */
-fun <T: Event> JDA.awaitEvent(type: Class<T>,
-                              count: Int = 1,
-                              timeoutMS: Long = -1,
-                              context: CoroutineContext = CommonPool,
-                              check: (T) -> Boolean = {true}
+fun <T: Event> JDA.awaitEvents(type: Class<T>,
+                               count: Int = 1,
+                               timeoutMS: Long = -1,
+                               context: CoroutineContext = CommonPool,
+                               check: (T) -> Boolean = {true}
 ): KPromise<List<T>> {
     return promisify(context, KEventWaiter(this, type, count, timeoutMS, check))
 }
