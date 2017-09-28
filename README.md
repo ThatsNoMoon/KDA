@@ -14,4 +14,4 @@ dependencies {
 }
 ```
 
-Stay tuned for examples and documentation!
+Take a look at the [Examples Page!](https://github.com/ThatsNoMoon/KDA/wiki/Examples)
