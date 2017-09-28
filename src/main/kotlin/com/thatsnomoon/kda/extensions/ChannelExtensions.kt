@@ -19,7 +19,9 @@ import com.thatsnomoon.kda.entities.KPromise
 import net.dv8tion.jda.core.entities.Channel
 
 /**
- * Blocking function to create a copy of this Channel. Normal restrictions apply; you must have the proper permissions to create channels for this function not to throw.
+ * Blocking function to create a copy of this Channel.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create channels for this function not to throw.
  * @return A copy of this Channel.
  */
 fun Channel.createCopy(): Channel {
@@ -27,7 +29,9 @@ fun Channel.createCopy(): Channel {
 }
 
 /**
- * Asynchronous function to cerate a copy of this Channel. Normal restrictions apply; you must have the proper permissions to create channels for this function not to throw.
+ * Asynchronous function to cerate a copy of this Channel.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create channels for this function not to throw.
  * @return A KPromise that will resolve to a copy of this Channel.
  */
 fun Channel.createCopyAsync(): KPromise<Channel> {

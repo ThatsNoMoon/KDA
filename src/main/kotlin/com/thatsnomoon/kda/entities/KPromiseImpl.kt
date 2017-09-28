@@ -62,6 +62,7 @@ internal class KPromiseImpl<T>(context: CoroutineContext, function: suspend () -
     }
 
     override fun await(): T? {
+        caught = true
         if (completed) {
             return result
         }

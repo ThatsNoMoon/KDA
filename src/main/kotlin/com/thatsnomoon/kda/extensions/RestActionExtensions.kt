@@ -2,8 +2,8 @@ package com.thatsnomoon.kda.extensions
 
 import com.thatsnomoon.kda.entities.KPromise
 import com.thatsnomoon.kda.entities.promisify
-import net.dv8tion.jda.core.requests.RestAction
 import kotlinx.coroutines.experimental.delay
+import net.dv8tion.jda.core.requests.RestAction
 import java.util.concurrent.TimeUnit
 
 /**
@@ -22,6 +22,7 @@ fun <T> RestAction<T>.promisify(): KPromise<T> {
 
 /**
  * Function to turn a RestAction into a KPromise that will resolve to the value of the completed RestAction after the specified time.
+ *
  * Note that while the KPromise will be returned immediately, the RestAction will be queued after the specified amount of time.
  * By default, delay is in milliseconds.
  * @param delay Time to wait before queuing this RestAction
@@ -31,6 +32,7 @@ fun <T> RestAction<T>.promisify(): KPromise<T> {
 fun <T> RestAction<T>.promisifyAfter(delay: Long, unit: TimeUnit = TimeUnit.MILLISECONDS): KPromise<T> {
     return promisify {
         val future = this@promisifyAfter.submitAfter(delay, unit)
+        delay(delay)
         while (!future.isDone) {
             delay(10)
         }

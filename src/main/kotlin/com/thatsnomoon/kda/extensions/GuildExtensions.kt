@@ -18,12 +18,17 @@ package com.thatsnomoon.kda.extensions
 import com.thatsnomoon.kda.entities.KPromise
 import com.thatsnomoon.kda.entities.promisify
 import kotlinx.coroutines.experimental.delay
-import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Role
+import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.requests.restaction.ChannelAction
 import net.dv8tion.jda.core.requests.restaction.RoleAction
 
 /**
- * Blocking function to create a Role using the RoleAction class as a builder. Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
+ * Blocking function to create a Role using the RoleAction class as a builder.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
  * @param init Function to call on a RoleAction to configure the desired role.
  * @return The resulting Role.
  */
@@ -34,7 +39,9 @@ inline fun Guild.buildRole(init: RoleAction.() -> Unit): Role {
 }
 
 /**
- * Asynchronous function to create a Role using the RoleAction class as a builder. Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
+ * Asynchronous function to create a Role using the RoleAction class as a builder.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
  * @param init Function to call on a RoleAction to configure the desired role.
  * @return A KPromise that will resolve to the Role returned by completing the RoleAction.
  */
@@ -45,7 +52,9 @@ inline fun Guild.buildRoleAsync(init: RoleAction.() -> Unit): KPromise<Role> {
 }
 
 /**
- * Blocking function to create a TextChannel using the ChannelAction class as a builder. Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
+ * Blocking function to create a TextChannel using the ChannelAction class as a builder.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
  * @param name Name to call the resulting TextChannel.
  * @param init Function to call on a ChannelAction to configure the desired TextChannel.
  * @return The resulting TextChannel.
@@ -57,7 +66,9 @@ inline fun Guild.buildTextChannel(name: String, init: ChannelAction.() -> Unit):
 }
 
 /**
- * Asynchronous function to create a TextChannel using the ChannelAction class as a builder. Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
+ * Asynchronous function to create a TextChannel using the ChannelAction class as a builder.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
  * @param name Name to call the resulting TextChannel.
  * @param init Function to call on a ChannelAction to configure the desired TextChannel.
  * @return A KPromise that resolves to the resulting TextChannel.
@@ -75,7 +86,9 @@ inline fun Guild.buildTextChannelAsync(name: String, init: ChannelAction.() -> U
 }
 
 /**
- * Blocking function to create a VoiceChannel using the ChannelAction class as a builder. Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
+ * Blocking function to create a VoiceChannel using the ChannelAction class as a builder.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
  * @param name Name to call the resulting TextChannel.
  * @param init Function to call on a ChannelAction to configure the desired VoiceChannel.
  * @return The resulting VoiceChannel.
@@ -87,7 +100,9 @@ inline fun Guild.buildVoiceChannel(name: String, init: ChannelAction.() -> Unit)
 }
 
 /**
- * Asynchronous function to create a VoiceChannel using the ChannelAction class as a builder. Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
+ * Asynchronous function to create a VoiceChannel using the ChannelAction class as a builder.
+ *
+ * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
  * @param name Name to call the resulting VoiceChannel.
  * @param init Function to call on a ChannelAction to configure the desired VoiceChannel.
  * @return A KPromise that resolves to the resulting VoiceChannel.

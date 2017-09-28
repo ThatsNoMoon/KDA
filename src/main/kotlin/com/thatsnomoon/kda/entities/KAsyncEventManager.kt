@@ -18,15 +18,16 @@ package com.thatsnomoon.kda.entities
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.newFixedThreadPoolContext
 import net.dv8tion.jda.core.entities.impl.JDAImpl
-import kotlin.repeat
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.hooks.EventListener
 import net.dv8tion.jda.core.hooks.IEventManager
 import java.util.concurrent.CopyOnWriteArraySet
 
 /**
- * Asynchronous event manager using Kotlin coroutines for handling events.
- * @param threadCount Thread count for the internal async thread pool for handling events
+ * Asynchronous JDA event manager using Kotlin coroutines for handling events.
+ *
+ * @constructor Primary constructor for KAsyncEventManager
+ * @param threadCount Thread count for the internal async thread pool for handling events (default: 1).
  */
 
 class KAsyncEventManager(threadCount: Int = 1): IEventManager {

@@ -23,17 +23,17 @@ import net.dv8tion.jda.core.hooks.EventListener
 /**
  * Class to await JDA events.
  *
- * To use this class, simply initialize it with the constructor parameters, and call resolve(). Resolve() is a suspending function that will suspend until one of two things happens:
- *  1. The amount of events that match the check function equals count.
+ * To use this class, either use one of the helper functions ([awaitEvents][com.thatsnomoon.kda.extensions.awaitEvents] or [awaitMessages][com.thatsnomoon.kda.extensions.awaitMessages]) or initialize it with the primary constructor, and call [resolve], which is a suspending function that will suspend until one of two things happens:
+ *  1. The amount of events that have matched the check function equals count.
  *  2. The amount of milliseconds that have passed exceeded timeoutMS.
  *
- * Note that when used with a KPromise, default implementation will never return a null value.
+ * Note that when used with a [KPromise] (i.e. [awaitEvents][com.thatsnomoon.kda.extensions.awaitEvents]), default implementation will **never** return a null value.
  *
- * @param jda JDA instance to wait from.
+ * @param jda JDA instance to listen from.
  * @param type Type of event to listen for.
- * @param count Count of events to listen for.
- * @param timeoutMS Amount, in milliseconds, to wait for events before timing out (and resolving to an empty list).
- * @param check Function to check each event received of the correct type against.
+ * @param count Optional: number of events to listen for before returning (default: 1).
+ * @param timeoutMS Optional: amount of time, in milliseconds, to wait for events before timing out (and resolving to an empty list) (default: -1, no timeout).
+ * @param check Optional: function to check each event received of the correct type against (default: none, all events of the correct type are returned).
  */
 class KEventWaiter<out T: Event>(private val jda: JDA,
                                  private val type: Class<T>,
@@ -61,8 +61,11 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
 
     private var resolved = false
 
-    private var result: List<T> = listOf()
+    private var result: List<T> = mutableListOf()
 
+    /**
+     * Internal event listening function.
+     */
     override fun onEvent(event: Event) {
         if (type.isInstance(event)) {
             try {
@@ -76,6 +79,7 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
                 }
             } catch (t: Throwable) {
                 resolved = true
+                deregister()
                 throw RuntimeException("Check function passed to KEventWaiter failed", t)
             }
         }
@@ -95,7 +99,6 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
             while (!resolved) {
                 delay(10)
                 if (timedOut) {
-                    deregister()
                     resolved = true
                 }
             }
@@ -106,8 +109,21 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
         return result
     }
 
+    /**
+     * Cancels this event waiter, forcing any [resolve] calls to return any events collected so far.
+     */
+    override fun cancel() {
+        deregister()
+        resolved = true
+    }
+
+    /**
+     * Basically delete this event waiter, removing it from the jda instance and removing the timeout coroutine.
+     */
     private fun deregister() {
-        jda.removeEventListener(this)
+        try {
+            jda.removeEventListener(this)
+        } catch (e: Exception) {/* ignore */}
         if (!timeoutJob.isCancelled && !timeoutJob.isActive) timeoutJob.cancel()
     }
 }
