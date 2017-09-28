@@ -33,6 +33,7 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
     private var timedOut = false
 
     init {
+        if (count < 1) throw IllegalArgumentException("Count parameter passed to KEventWaiter must be greater than zero")
         jda.addEventListener(this)
         timeoutJob = launch(CommonPool) {
             if (timeoutMS > 0) {
@@ -57,6 +58,8 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
                         resolved = true
                         deregister()
                     }
+                    else if (timeoutMS > 0)
+                        restartTimeout()
                 }
             } catch (t: Throwable) {
                 resolved = true
@@ -66,12 +69,17 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
     }
 
     override suspend fun resolve(): List<T> {
-        while (!resolved) {
-            delay(10)
-            if (timedOut) {
-                deregister()
-                throw TimeoutException("Timeout was exceeded on KEventWaiter")
+        try {
+            while (!resolved) {
+                delay(10)
+                if (timedOut) {
+                    deregister()
+                    resolved = true
+                }
             }
+        } catch(e: CancellationException) {
+            deregister()
+            throw e
         }
         return result
     }
@@ -85,5 +93,8 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
         }
     }
 
-    private fun deregister() = jda.removeEventListener(this)
+    private fun deregister() {
+        jda.removeEventListener(this)
+        if (!timeoutJob.isCancelled && !timeoutJob.isActive) timeoutJob.cancel()
+    }
 }

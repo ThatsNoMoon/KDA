@@ -46,8 +46,8 @@ internal class KPromiseResolvable<T>(context: CoroutineContext, private val reso
                 successCallbacks.forEach { it(result) }
             } catch (t: Throwable) {
                 exception = t
-                active = false
                 completedExceptionally = true
+                active = false
                 when {
                     caught -> failureCallbacks.forEach { it(exception) }
                     hasGlobalHandler -> globalHandler(t)
