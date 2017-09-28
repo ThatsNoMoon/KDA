@@ -27,8 +27,10 @@ internal var globalHandler: suspend (Throwable) -> Unit = {}
  * @param handler Optionally suspending function to call when KPromises with no specified failure callbacks resolve exceptionally.
  */
 fun setUncaughtPromiseHandler(handler: suspend (Throwable) -> Unit) {
-    hasGlobalHandler = true
-    globalHandler = handler
+    synchronized(globalHandler) {
+        hasGlobalHandler = true
+        globalHandler = handler
+    }
 }
 
 /**
@@ -39,6 +41,10 @@ fun setUncaughtPromiseHandler(handler: suspend (Throwable) -> Unit) {
  */
 fun <T> promisify(context: CoroutineContext = CommonPool, function: suspend () -> T): KPromise<T> {
     return KPromiseImpl(context, function)
+}
+
+fun <T> promisify(context: CoroutineContext = CommonPool, resolvable: Resolvable<T>): KPromise<T> {
+    return KPromiseResolvable(context, resolvable)
 }
 
 /**
@@ -55,7 +61,6 @@ interface KPromise<T> {
     /**
      * Blocking function that returns the result of this KPromise when it is complete. If this KPromise completes exceptionally, this method will throw that exception when it is called or when the promise finishes.
      * @return The resolved value of this KPromise, if one exists.
-     * @throws CancellationException, Throwable
      */
     fun await(): T?
 
