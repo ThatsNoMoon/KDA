@@ -15,6 +15,11 @@
 
 package com.thatsnomoon.kda.entities
 
+/**
+ * Interface for a suspending function that returns a value.
+ *
+ * This is similar to Callable, but suspending.
+ */
 interface Resolvable<out T> {
 
     suspend fun resolve(): T

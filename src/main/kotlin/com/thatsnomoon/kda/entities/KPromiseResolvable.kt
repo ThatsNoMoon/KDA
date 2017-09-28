@@ -20,6 +20,9 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import kotlin.coroutines.experimental.CoroutineContext
 
+/**
+ * Implementation of KPromise, using a Resolvable interface.
+ */
 internal class KPromiseResolvable<T>(context: CoroutineContext, private val resolvable: Resolvable<T>): KPromise<T> {
 
     private var active = true

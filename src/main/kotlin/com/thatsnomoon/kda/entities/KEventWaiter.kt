@@ -20,6 +20,21 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.hooks.EventListener
 
+/**
+ * Class to await JDA events.
+ *
+ * To use this class, simply initialize it with the constructor parameters, and call resolve(). Resolve() is a suspending function that will suspend until one of two things happens:
+ *  1. The amount of events that match the check function equals count.
+ *  2. The amount of milliseconds that have passed exceeded timeoutMS.
+ *
+ * Note that when used with a KPromise, default implementation will never return a null value.
+ *
+ * @param jda JDA instance to wait from.
+ * @param type Type of event to listen for.
+ * @param count Count of events to listen for.
+ * @param timeoutMS Amount, in milliseconds, to wait for events before timing out (and resolving to an empty list).
+ * @param check Function to check each event received of the correct type against.
+ */
 class KEventWaiter<out T: Event>(private val jda: JDA,
                                  private val type: Class<T>,
                                  private val count: Int = 1,
@@ -58,8 +73,6 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
                         resolved = true
                         deregister()
                     }
-                    else if (timeoutMS > 0)
-                        restartTimeout()
                 }
             } catch (t: Throwable) {
                 resolved = true
@@ -68,6 +81,15 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
         }
     }
 
+    /**
+     * Suspends until this event waiter is resolved.
+     *
+     * This function suspends until one of two things happens:
+     *  1. The amount of events that match the check function equals count.
+     *  2. The amount of milliseconds that have passed exceeded timeoutMS.
+     *
+     *  @return A List of all the events collected.
+     */
     override suspend fun resolve(): List<T> {
         try {
             while (!resolved) {
@@ -82,15 +104,6 @@ class KEventWaiter<out T: Event>(private val jda: JDA,
             throw e
         }
         return result
-    }
-
-    private fun restartTimeout() {
-        timeoutJob.cancel()
-        timeoutJob = launch(CommonPool) {
-            delay(timeoutMS)
-            timedOut = true
-            deregister()
-        }
     }
 
     private fun deregister() {
