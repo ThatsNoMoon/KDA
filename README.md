@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ThatsNoMoon:KDA:master-SNAPSHOT`
+    compile 'com.github.ThatsNoMoon:KDA:c1bf56f`
 }
 ```
 
