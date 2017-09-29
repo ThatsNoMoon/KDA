@@ -6,11 +6,13 @@ Adding KDA as a Gradle dependency:
 apply plugin: 'maven'
 
 repositories {
+    // Add jcenter and other repositories as needed
     maven { url 'http://jitpack.io' }
 }
 
 dependencies {
-    compile 'com.github.ThatsNoMoon:KDA:73252fc`
+    compile 'com.github.ThatsNoMoon:KDA:master-SNAPSHOT`
+    // Add JDA and other dependencies as needed
 }
 ```
 
