@@ -47,17 +47,6 @@ fun <T> promisify(context: CoroutineContext = CommonPool, function: suspend () -
 }
 
 /**
- * Helper function to create a [KPromise] from a [Resolvable]
- *
- * @param context Optional: CoroutineContext to run this KPromise in. If none is specified, CommonPool is used.
- * @param resolvable Resolvable to promisify. If calling this object's [resolve][Resolvable.resolve] method returns normally, the returned KPromise will resolve with that return. If resolve throws an exception, the returned KPromise will resolve with that exception.
- * @return A new KPromise that resolves to the result of calling the resolvable's resolve method.
- */
-fun <T> promisify(context: CoroutineContext = CommonPool, resolvable: Resolvable<T>): KPromise<T> {
-    return KPromiseResolvable(context, resolvable)
-}
-
-/**
  * KPromises are a form of turning a blocking or suspending function into a promise, returning the result of the function or the exception if one occurred while executing the function.
  *
  * When a KPromise resolves successfully (the initial function returned a value) the success callbacks will be called, in the order of how they were added.
