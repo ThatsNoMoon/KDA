@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.ThatsNoMoon:KDA:master-SNAPSHOT`
+    compile 'com.github.ThatsNoMoon:KDA:master-SNAPSHOT'
     // Add JDA and other dependencies as needed
 }
 ```
