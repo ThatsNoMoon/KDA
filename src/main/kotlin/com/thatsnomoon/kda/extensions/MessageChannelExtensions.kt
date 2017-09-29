@@ -138,17 +138,3 @@ inline infix fun MessageChannel.sendEmbedAsync(init: EmbedBuilder.() -> Unit): K
     builder.init()
     return sendMessage(MessageBuilder().setEmbed(builder.build()).build()).promisify()
 }
-
-/**
- * Asynchronously await a message or multiple messages from this MessageChannel that match a given predicate before a timeout elapses.
- * @param count Number of messages to wait for.
- * @param timeoutMS Number of milliseconds to wait before returning however many events were received.
- * @param check Predicate to check the received event against.
- *
- * @return A KPromise that resolves to a non-null, possibly empty list of received messages that passed the check before the timeout elapsed.
- */
-fun MessageChannel.awaitMessages(count: Int = 1, timeoutMS: Long = -1, check: (MessageReceivedEvent) -> Boolean = {true}): KPromise<List<MessageReceivedEvent>> {
-    return this.jda.awaitEvents(MessageReceivedEvent::class.java, count, timeoutMS) {
-        it.channel.idLong == this@awaitMessages.idLong && check(it)
-    }
-}
