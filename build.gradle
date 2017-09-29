@@ -42,6 +42,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.18'
+    compile "org.jetbrains.kotlin:kotlin-reflect"
     compile 'net.dv8tion:JDA:3.3.1_276'
 
     testCompile 'org.apache.logging.log4j:log4j-core:2.8.2'
@@ -77,6 +78,7 @@ publishing {
 }
 
 compileKotlin {
+    kotlinOptions.noReflect = "false"
     kotlinOptions.jvmTarget = "1.8"
 }
 compileTestKotlin {
