@@ -17,7 +17,7 @@ group 'com.thatsnomoon'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.1.4-3'
+    ext.kotlin_version = '1.1.50'
 
     repositories {
         mavenCentral()
@@ -42,7 +42,6 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.18'
-    compile "org.jetbrains.kotlin:kotlin-reflect"
     compile 'net.dv8tion:JDA:3.3.1_276'
 
     testCompile 'org.apache.logging.log4j:log4j-core:2.8.2'
