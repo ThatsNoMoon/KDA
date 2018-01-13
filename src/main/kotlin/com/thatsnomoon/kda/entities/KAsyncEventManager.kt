@@ -17,11 +17,13 @@ package com.thatsnomoon.kda.entities
 
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.newFixedThreadPoolContext
-import net.dv8tion.jda.core.entities.impl.JDAImpl
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.hooks.EventListener
 import net.dv8tion.jda.core.hooks.IEventManager
+import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArraySet
+
+private val LOG = LoggerFactory.getLogger(KAsyncEventManager::class.java)
 
 /**
  * Asynchronous JDA event manager using Kotlin coroutines for handling events.
@@ -41,7 +43,7 @@ class KAsyncEventManager(threadCount: Int = 1): IEventManager {
                 try {
                     listeners.elementAt(index).onEvent(event)
                 } catch(t: Throwable) {
-                    JDAImpl.LOG.fatal("An EventListener had an uncaught exception: \n$t\n\tat ${t.stackTrace.joinToString("\n\tat ")}")
+                    LOG.error("An EventListener had an uncaught exception: \n$t\n\tat ${t.stackTrace.joinToString("\n\tat ")}")
                 }
             }
         }
@@ -55,6 +57,7 @@ class KAsyncEventManager(threadCount: Int = 1): IEventManager {
     }
 
     override fun getRegisteredListeners(): MutableList<Any> {
+        @Suppress("UNCHECKED_CAST")
         return listeners as MutableList<Any>
     }
 

@@ -17,7 +17,7 @@ group 'com.thatsnomoon'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.1.50'
+    ext.kotlin_version = '1.2.10'
 
     repositories {
         mavenCentral()
@@ -44,12 +44,8 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.18'
-    compile 'net.dv8tion:JDA:3.3.1_276'
-    compile 'com.github.MinnDevelopment.Gunfire:core:master-SNAPSHOT'
-    compile 'com.github.MinnDevelopment.Gunfire:commons:master-SNAPSHOT'
-
-    testCompile 'com.github.MinnDevelopment.Gunfire:core:master-SNAPSHOT'
-    testCompile 'com.github.MinnDevelopment.Gunfire:commons:master-SNAPSHOT'
+    compile 'net.dv8tion:JDA:3.5.0_327'
+    compile 'org.slf4j:slf4j-api:1.7.25'
 
     testCompile 'org.apache.logging.log4j:log4j-core:2.8.2'
     testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.2'
