@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Benjamin Scherer
+ * Copyright 2018 Benjamin Scherer
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,140 +15,353 @@
 
 package com.thatsnomoon.kda.extensions
 
-import com.thatsnomoon.kda.entities.KPromise
-import net.dv8tion.jda.core.EmbedBuilder
+import kotlinx.coroutines.experimental.Deferred
 import net.dv8tion.jda.core.MessageBuilder
+import net.dv8tion.jda.core.entities.Emote
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageChannel
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import java.io.File
+import java.io.InputStream
+import java.time.Duration
 
 /**
- * Blocking function to send a message to this MessageChannel.
- * @param message Message to send to this MessageChannel.
- * @return The sent Message.
+ * Sends a message to this channel.
+ *
+ * @param text Message content to send
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-infix fun MessageChannel.send(message: Message): Message {
-    return sendMessage(message).complete()
-}
+fun MessageChannel.send(text: String, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.sendMessage(text) after delay
 
 /**
- * Asynchronous function to send a message to this MessageChannel.
- * @param message Message to send.
- * @return KPromise resolving to the sent message.
+ * Sends a message to this channel.
+ *
+ * @param message Message to send
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-infix fun MessageChannel.sendAsync(message: Message): KPromise<Message> {
-    return sendMessage(message).promisify()
-}
+fun MessageChannel.send(message: Message, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.sendMessage(message) after delay
 
 /**
- * Blocking function to send a message to this MessageChannel.
- * @param init Function to call on a MessageBuilder to form a Message to send.
- * @return The sent Message.
+ * Sends a message to this channel.
+ *
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Function to "build" the message to send, i.e. set content and options
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-inline infix fun MessageChannel.send(init: MessageBuilder.() -> Unit): Message {
+inline fun MessageChannel.send(delay: Duration = Duration.ZERO, init: MessageBuilder.() -> Unit): Deferred<Message> {
     val builder = MessageBuilder()
     builder.init()
-    return sendMessage(builder.build()).complete()
+    return this.sendMessage(builder.build()) after delay
 }
 
 /**
- * Asynchronous function to send a message to this MessageChannel.
- * @param init Function to call on a MessageBuilder to form a Message to send.
- * @return KPromise resolving to the sent message.
+ * Sends a message to this channel.
+ *
+ * @param embed Embed to send
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-inline infix fun MessageChannel.sendAsync(init: MessageBuilder.() -> Unit): KPromise<Message> {
+fun MessageChannel.send(embed: MessageEmbed, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.sendMessage(MessageBuilder().setEmbed(embed).build()) after delay
+
+/**
+ * Sends a message with a file to this channel.
+ *
+ * @param data Data to send
+ * @param filename Filename for discord to display
+ * @param message Message to send with this file
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
+ */
+fun MessageChannel.sendWithFile(data: ByteArray, filename: String, message: Message? = null, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.sendFile(data, filename, message) after delay
+
+/**
+ * Sends a message with a file to this channel.
+ *
+ * @param data Data to send
+ * @param filename Filename for discord to display
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Function to "build" the message to send, i.e. set content and options
+ *
+ * @return [Deferred] that resolves to the sent message
+ */
+inline fun MessageChannel.sendWithFile(data: ByteArray, filename: String, delay: Duration = Duration.ZERO, init: MessageBuilder.() -> Unit): Deferred<Message> {
     val builder = MessageBuilder()
     builder.init()
-    return sendMessage(builder.build()).promisify()
+    return this.sendFile(data, filename, builder.build()) after delay
 }
 
 /**
- * Blocking function to send text to this MessageChannel.
- * @param content Content of the Message to send.
- * @return The sent Message.
+ * Sends a message with a file to this channel.
+ *
+ * @param file File to send
+ * @param filename Filename for discord to display
+ * @param message Message to send with this file
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-infix fun MessageChannel.sendText(content: String): Message {
-    return sendMessage(content).complete()
-}
+fun MessageChannel.sendWithFile(file: File, filename: String = file.name, message: Message? = null, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.sendFile(file, filename, message) after delay
 
 /**
- * Asynchronous function to send text to this MessageChannel.
- * @param content Content of the Message to send.
- * @return KPromise resolving to the sent message.
+ * Sends a message with a file to this channel.
+ *
+ * @param file File to send
+ * @param filename Filename for discord to display
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Function to "build" the message to send, i.e. set content and options
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-infix fun MessageChannel.sendTextAsync(content: String): KPromise<Message> {
-    return sendMessage(content).promisify()
-}
-
-/**
- * Blocking function to send text to this MessageChannel.
- * @param lazyContent Function to evaluate to the text to send.
- * @return The sent Message.
- */
-inline infix fun MessageChannel.sendText(lazyContent: () -> Any?): Message {
-    return sendMessage(lazyContent().toString()).complete()
-}
-
-/**
- * Asynchronous function to send text to this MessageChannel.
- * @param lazyContent Function to evaluate to the text to send.
- * @return KPromise resolving to the sent message.
- */
-inline infix fun MessageChannel.sendTextAsync(lazyContent: () -> Any?): KPromise<Message> {
-    return sendMessage(lazyContent().toString()).promisify()
-}
-
-/**
- * Blocking function to send an embed to this MessageChannel.
- * @param embed MessageEmbed to send.
- * @return The sent Message.
- */
-infix fun MessageChannel.sendEmbed(embed: MessageEmbed): Message {
-    return sendMessage(MessageBuilder().setEmbed(embed).build()).complete()
-}
-
-/**
- * Asynchronous function to send an embed to this MessageChannel.
- * @param embed MessageEmbed to send.
- * @return KPromise resolving to the sent message.
- */
-infix fun MessageChannel.sendEmbedAsync(embed: MessageEmbed): KPromise<Message> {
-    return sendMessage(MessageBuilder().setEmbed(embed).build()).promisify()
-}
-
-/**
- * Blocking function to send an embed to this MessageChannel.
- * @param init Function to call on an EmbedBuilder to form a MessageEmbed to send.
- * @return The sent Message.
- */
-inline infix fun MessageChannel.sendEmbed(init: EmbedBuilder.() -> Unit): Message {
-    val builder = EmbedBuilder()
+inline fun MessageChannel.sendWithFile(file: File, filename: String = file.name, delay: Duration = Duration.ZERO, init: MessageBuilder.() -> Unit): Deferred<Message> {
+    val builder = MessageBuilder()
     builder.init()
-    return sendMessage(MessageBuilder().setEmbed(builder.build()).build()).complete()
+    return this.sendFile(file, filename, builder.build()) after delay
 }
 
 /**
- * Asynchronous function to send an embed to this MessageChannel.
- * @param init Function to call on an EmbedBuilder to form a MessageEmbed to send.
- * @return KPromise resolving to the sent message.
+ * Sends a message with a file to this channel.
+ *
+ * @param data Data to send
+ * @param filename Filename for discord to display
+ * @param message Message to send with this file
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-inline infix fun MessageChannel.sendEmbedAsync(init: EmbedBuilder.() -> Unit): KPromise<Message> {
-    val builder = EmbedBuilder()
+fun MessageChannel.sendWithFile(data: InputStream, filename: String, message: Message? = null, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.sendFile(data, filename, message) after delay
+
+/**
+ * Sends a message with a file to this channel.
+ *
+ * @param data Data to send
+ * @param filename Filename for discord to display
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Function to "build" the message to send, i.e. set content and options
+ *
+ * @return [Deferred] that resolves to the sent message
+ */
+inline fun MessageChannel.sendWithFile(data: InputStream, filename: String, delay: Duration = Duration.ZERO, init: MessageBuilder.() -> Unit): Deferred<Message> {
+    val builder = MessageBuilder()
     builder.init()
-    return sendMessage(MessageBuilder().setEmbed(builder.build()).build()).promisify()
+    return this.sendFile(data, filename, builder.build()) after delay
 }
 
+/**
+ * Retrieves a message from this channel by its id.
+ *
+ * @param messageId ID of the message to retrieve
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the retrieved message
+ */
+fun MessageChannel.getMessage(messageId: Long, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.getMessageById(messageId) after delay
+
+/**
+ * Retrieves a message from this channel by its id.
+ *
+ * @param messageId ID of the message to retrieve
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the retrieved message
+ */
+fun MessageChannel.getMessage(messageId: String, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.getMessageById(messageId) after delay
+
+/**
+ * Adds a reaction to a message in this channel by its id.
+ *
+ * @param messageId ID of the message to react to
+ * @param unicode Unicode emoji to react with
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.reactToMessage(messageId: Long, unicode: String, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.addReactionById(messageId, unicode) after delay map { Unit }
+
+/**
+ * Adds a reaction to a message in this channel by its id.
+ *
+ * @param messageId ID of the message to react to
+ * @param unicode Unicode emoji to react with
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.reactToMessage(messageId: String, unicode: String, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.addReactionById(messageId, unicode) after delay map { Unit }
+
+/**
+ * Adds a reaction to a message in this channel by its id.
+ *
+ * @param messageId ID of the message to react to
+ * @param emote Emote to react with
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.reactToMessage(messageId: Long, emote: Emote, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.addReactionById(messageId, emote) after delay map { Unit }
+
+/**
+ * Adds a reaction to a message in this channel by its id.
+ *
+ * @param messageId ID of the message to react to
+ * @param emote Emote to react with
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.reactToMessage(messageId: String, emote: Emote, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.addReactionById(messageId, emote) after delay map { Unit }
+
+/**
+ * Removes a reaction from a message in this channel by its id.
+ *
+ * @param messageId ID of the message to remove a reaction from
+ * @param unicode Emote to remove
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.deleteMessageReaction(messageId: Long, unicode: String, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.removeReactionById(messageId, unicode) after delay map { Unit }
+
+/**
+ * Removes a reaction from a message in this channel by its id.
+ *
+ * @param messageId ID of the message to remove a reaction from
+ * @param unicode Emote to remove
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.deleteMessageReaction(messageId: String, unicode: String, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.removeReactionById(messageId, unicode) after delay map { Unit }
+
+/**
+ * Removes a reaction from a message in this channel by its id.
+ *
+ * @param messageId ID of the message to remove a reaction from
+ * @param emote Emote to remove
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.deleteMessageReaction(messageId: Long, emote: Emote, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.removeReactionById(messageId, emote) after delay map { Unit }
+
+/**
+ * Removes a reaction from a message in this channel by its id.
+ *
+ * @param messageId ID of the message to remove a reaction from
+ * @param emote Emote to remove
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.deleteMessageReaction(messageId: String, emote: Emote, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.removeReactionById(messageId, emote) after delay map { Unit }
+
+/**
+ * Deletes a message in this channel by its id.
+ *
+ * @param messageId ID of the message to delete
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.deleteMessage(messageId: Long, reason: String = "", delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.deleteMessageById(messageId).reason(reason) after delay map { Unit }
+
+/**
+ * Deletes a message in this channel by its id.
+ *
+ * @param messageId ID of the message to delete
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.deleteMessage(messageId: String, reason: String = "", delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.deleteMessageById(messageId).reason(reason) after delay map { Unit }
+
+/**
+ * Retrieves the pinned messages in this channel.
+ *
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the pinned messages
+ */
+fun MessageChannel.getPins(delay: Duration = Duration.ZERO): Deferred<List<Message>> =
+        this.pinnedMessages after delay
+
+/**
+ * Pins a message in this channel by its id.
+ *
+ * @param messageId ID of the message to pin
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.pinMessage(messageId: Long, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.pinMessageById(messageId) after delay map { Unit }
+
+/**
+ * Pins a message in this channel by its id.
+ *
+ * @param messageId ID of the message to pin
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.pinMessage(messageId: String, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.pinMessageById(messageId) after delay map { Unit }
+
+/**
+ * Unpins a message in this channel by its id.
+ *
+ * @param messageId ID of the message to unpin
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.unpinMessage(messageId: Long, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.unpinMessageById(messageId) after delay map { Unit }
+/**
+ * Unpins a message in this channel by its id.
+ *
+ * @param messageId ID of the message to unpin
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
+ */
+fun MessageChannel.unpinMessage(messageId: String, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.unpinMessageById(messageId) after delay map { Unit }
 /**
  * Asynchronously await a message or multiple messages from this MessageChannel that match a given predicate before a timeout elapses.
- * @param count Number of messages to wait for.
- * @param timeoutMS Number of milliseconds to wait before returning however many events were received.
- * @param check Predicate to check the received event against.
+ * @param count Number of messages to wait for
+ * @param timeout [Duration] to wait before returning however many messages were collected, even if that amount is less than the provided count
+ * @param predicate Predicate to predicate received events against. If this function returns true when passed the message, the message is added to the result to be returned (default: none, all messages are returned)
  *
- * @return A [KPromise] that resolves to a non-null, possibly empty list of received messages that passed the check before the timeout elapsed.
+ * @return [Deferred] that resolves to a possibly empty list of received messages that passed the predicate before the timeout elapsed.
  */
-fun MessageChannel.awaitMessages(count: Int = 1, timeoutMS: Long = -1, check: (MessageReceivedEvent) -> Boolean = {true}): KPromise<List<MessageReceivedEvent>> {
-    return this.jda.awaitEvents(MessageReceivedEvent::class.java, count, timeoutMS) {
-        it.channel.idLong == this@awaitMessages.idLong && check(it)
-    }
+fun MessageChannel.awaitMessages(count: Int = 1, timeout: Duration? = null, predicate: (Message) -> Boolean = {true}): Deferred<List<Message>> {
+    return this.jda.awaitEvents(MessageReceivedEvent::class.java, count, timeout) {
+        it.channel.idLong == this@awaitMessages.idLong && predicate(it.message)
+    } map { list -> list.map { event -> event.message } }
 }

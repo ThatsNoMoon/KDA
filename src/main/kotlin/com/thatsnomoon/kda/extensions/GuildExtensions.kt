@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Benjamin Scherer
+ * Copyright 2018 Benjamin Scherer
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,106 +15,76 @@
 
 package com.thatsnomoon.kda.extensions
 
-import com.thatsnomoon.kda.entities.KPromise
-import com.thatsnomoon.kda.entities.promisify
-import kotlinx.coroutines.experimental.delay
-import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.core.entities.Role
-import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.entities.VoiceChannel
+import kotlinx.coroutines.experimental.Deferred
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.requests.restaction.ChannelAction
 import net.dv8tion.jda.core.requests.restaction.RoleAction
+import java.time.Duration
 
 /**
- * Blocking function to create a Role using the RoleAction class as a builder.
+ * Builds a [Role], using [RoleAction] as a "builder" class.
  *
  * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
- * @param init Function to call on a RoleAction to configure the desired role.
- * @return The resulting Role.
+ *
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Block to "build" the new Role, i.e. set desired options
+ *
+ * @return [Deferred] that will resolve to the created Role
  */
-inline fun Guild.buildRole(init: RoleAction.() -> Unit): Role {
+inline fun Guild.buildRole(delay: Duration = Duration.ZERO, init: RoleAction.() -> Unit): Deferred<Role> {
     val action = this.controller.createRole()
     action.init()
-    return action.complete()
+    return action after delay
 }
 
 /**
- * Asynchronous function to create a Role using the RoleAction class as a builder.
+ * Builds a [TextChannel], using [ChannelAction] as a "builder" class.
  *
  * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
- * @param init Function to call on a RoleAction to configure the desired role.
- * @return A KPromise that will resolve to the Role returned by completing the RoleAction.
- */
-inline fun Guild.buildRoleAsync(init: RoleAction.() -> Unit): KPromise<Role> {
-    val action = this.controller.createRole()
-    action.init()
-    return action.promisify()
-}
-
-/**
- * Blocking function to create a TextChannel using the ChannelAction class as a builder.
  *
- * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
- * @param name Name to call the resulting TextChannel.
- * @param init Function to call on a ChannelAction to configure the desired TextChannel.
- * @return The resulting TextChannel.
+ * @param name Name to call the new TextChannel.
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Block to "build" the new TextChannel, i.e. set desired options.
+ *
+ * @return [Deferred] that will resolve to the created TextChannel
  */
-inline fun Guild.buildTextChannel(name: String, init: ChannelAction.() -> Unit): TextChannel {
+inline fun Guild.buildTextChannel(name: String, delay: Duration = Duration.ZERO, init: ChannelAction.() -> Unit): Deferred<TextChannel> {
     val action = this.controller.createTextChannel(name)
     action.init()
-    return action.complete() as TextChannel
+    return action after delay map { it as TextChannel }
 }
 
 /**
- * Asynchronous function to create a TextChannel using the ChannelAction class as a builder.
+ * Builds a [VoiceChannel], using [ChannelAction] as a "builder" class.
  *
  * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
- * @param name Name to call the resulting TextChannel.
- * @param init Function to call on a ChannelAction to configure the desired TextChannel.
- * @return A KPromise that resolves to the resulting TextChannel.
- */
-inline fun Guild.buildTextChannelAsync(name: String, init: ChannelAction.() -> Unit): KPromise<TextChannel> {
-    val action = this.controller.createTextChannel(name)
-    action.init()
-    return promisify {
-        val future = action.submit()
-        while (!future.isDone) {
-            delay(10)
-        }
-        future.get() as TextChannel
-    }
-}
-
-/**
- * Blocking function to create a VoiceChannel using the ChannelAction class as a builder.
  *
- * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
- * @param name Name to call the resulting TextChannel.
- * @param init Function to call on a ChannelAction to configure the desired VoiceChannel.
- * @return The resulting VoiceChannel.
+ * @param name Name to call the new VoiceChannel.
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Block to "build" the new VoiceChannel, i.e. set desired options.
+ *
+ * @return [Deferred] that will resolve to the created VoiceChannel
  */
-inline fun Guild.buildVoiceChannel(name: String, init: ChannelAction.() -> Unit): VoiceChannel {
+inline fun Guild.buildVoiceChannel(name: String, delay: Duration = Duration.ZERO, init: ChannelAction.() -> Unit): Deferred<VoiceChannel> {
     val action = this.controller.createVoiceChannel(name)
     action.init()
-    return action.complete() as VoiceChannel
+    return action after delay map { it as VoiceChannel }
 }
 
 /**
- * Asynchronous function to create a VoiceChannel using the ChannelAction class as a builder.
+ * Retrieves the [Guild.Ban]s for this Guild.
  *
- * Normal restrictions apply; you must have the proper permissions to create Roles for this function not to throw.
- * @param name Name to call the resulting VoiceChannel.
- * @param init Function to call on a ChannelAction to configure the desired VoiceChannel.
- * @return A KPromise that resolves to the resulting VoiceChannel.
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that will resolve to the list of bans
  */
-inline fun Guild.buildVoiceChannelAsync(name: String, init: ChannelAction.() -> Unit): KPromise<VoiceChannel> {
-    val action = this.controller.createVoiceChannel(name)
-    action.init()
-    return promisify {
-        val future = action.submit()
-        while (!future.isDone) {
-            delay(10)
-        }
-        future.get() as VoiceChannel
-    }
-}
+fun Guild.bans(delay: Duration = Duration.ZERO): Deferred<List<Guild.Ban>> = this.banList after delay
+
+/**
+ * Retrieves the [Invite]s for this Guild.
+ *
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that will resolve to the list of invites
+ */
+fun Guild.invites(delay: Duration = Duration.ZERO): Deferred<List<Invite>> = this.invites after delay

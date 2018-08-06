@@ -1,62 +1,166 @@
+/*
+ * Copyright 2018 Benjamin Scherer
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.thatsnomoon.kda.extensions
 
-import com.thatsnomoon.kda.entities.KPromise
+import kotlinx.coroutines.experimental.Deferred
+import net.dv8tion.jda.core.EmbedBuilder
+import net.dv8tion.jda.core.MessageBuilder
+import net.dv8tion.jda.core.entities.Emote
 import net.dv8tion.jda.core.entities.Message
-import java.util.concurrent.TimeUnit
+import net.dv8tion.jda.core.entities.MessageEmbed
+import java.time.Duration
 
 /**
- * Blocking function to send text to this MessageChannel.
- * @param lazyContent Function to evaluate to the text to send, optionally using the Message being replied to.
- * @return The sent Message.
+ * Replies to this message.
+ *
+ * This simply sends a message to the [net.dv8tion.jda.core.entities.MessageChannel] that this message came from.
+ *
+ * @param text Text to send
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
  */
-infix inline fun Message.reply(lazyContent: (Message) -> Any?): Message {
-    return this.channel.sendMessage(lazyContent(this).toString()).complete()
+fun Message.reply(text: String, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.channel.send(text, delay)
+
+/**
+ * Replies to this message.
+ *
+ * This simply sends a message to the [net.dv8tion.jda.core.entities.MessageChannel] that this message came from.
+ *
+ * @param message Message to send
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
+ */
+fun Message.reply(message: Message, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.channel.send(message, delay)
+
+/**
+ * Replies to this message.
+ *
+ * This simply sends a message to the [net.dv8tion.jda.core.entities.MessageChannel] that this message came from.
+ *
+ * @param delay [Duration] to wait before queueing this action
+ * @param init Function to "build" the message to send, i.e. set content and options
+ *
+ * @return [Deferred] that resolves to the sent message
+ */
+fun Message.reply(delay: Duration = Duration.ZERO, init: MessageBuilder.() -> Unit): Deferred<Message> =
+        this.channel.send(delay, init)
+
+/**
+ * Replies to this message.
+ *
+ * This simply sends a message to the [net.dv8tion.jda.core.entities.MessageChannel] that this message came from.
+ *
+ * @param embed Embed to send
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the sent message
+ */
+fun Message.reply(embed: MessageEmbed, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.channel.send(embed, delay)
+
+/**
+ * Edits this message.
+ *
+ * @param text New content for this message
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the new message
+ */
+fun Message.edit(text: String, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.editMessage(text) after delay
+
+/**
+ * Edits this message.
+ *
+ * @param message New content for this message
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the new message
+ */
+fun Message.edit(message: Message, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.editMessage(message) after delay
+
+/**
+ * Edits this message.
+ *
+ * @param init Function to "build" the new message, i.e. set content and options
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the new message
+ */
+fun Message.edit(delay: Duration = Duration.ZERO, init: MessageBuilder.() -> Unit): Deferred<Message> {
+    val builder = MessageBuilder()
+    builder.init()
+    return this.edit(builder.build(), delay)
 }
 
 /**
- * Asynchronous function to send text to this MessageChannel.
- * @param lazyContent Function to evaluate to the text to send, optionally using the Message being replied to.
- * @return A KPromise resolving to the sent Message.
+ * Edits this message.
+ *
+ * @param embed New content for this message
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return [Deferred] that resolves to the new message
  */
-infix inline fun Message.replyAsync(lazyContent: (Message) -> Any?): KPromise<Message>? {
-    val action = this.channel.sendMessage(lazyContent(this).toString())
-    return action.promisify()
-}
+fun Message.edit(embed: MessageEmbed, delay: Duration = Duration.ZERO): Deferred<Message> =
+        this.editMessage(embed) after delay
 
 /**
- * Asynchronous function to send text to this MessageChannel.
- * @param delay Time to wait before replying to this Message.
- * @param unit TimeUnit to use for delay. Default is milliseconds.
- * @param lazyContent Function to evaluate to the text to send, optionally using the Message being replied to.
- * @return A KPromise resolving to the sent Message.
+ * Deletes this message.
+ *
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
  */
-inline fun Message.replyAfterAsync(delay: Long = 1, unit: TimeUnit = TimeUnit.MILLISECONDS, lazyContent: (Message) -> Any?): KPromise<Message> {
-    return this.channel.sendMessage(lazyContent(this).toString()).promisifyAfter(delay, unit)
-}
+fun Message.delete(reason: String = "", delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.delete().reason(reason) after delay map { Unit }
 
 /**
- * Asynchronous function to delete this message.
- * @return KPromise that resolves when this action is completed.
+ * Reacts to this message.
+ *
+ * @param unicode Unicode emoji to react with
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
  */
-fun Message.deleteAsync(): KPromise<Void> {
-    return this.delete().promisify()
-}
+fun Message.react(unicode: String, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.addReaction(unicode) after delay map { Unit }
 
 /**
- * Asynchronous function to delete this message after a delay.
- * @param delay Time to wait before deleting this message.
- * @param unit TimeUnit to use for delay. Default is milliseconds.
- * @return KPromise that resolves when this action is completed.
+ * Reacts to this message.
+ *
+ * @param emote Emote to react with
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
  */
-fun Message.deleteAfterAsync(delay: Long, unit: TimeUnit = TimeUnit.MILLISECONDS): KPromise<Void> {
-    return this.delete().promisifyAfter(delay, unit)
-}
+fun Message.react(emote: Emote, delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.addReaction(emote) after delay map { Unit }
 
 /**
- * Blocking function to delete this message after a delay.
- * @param delay Time to wait before deleting this message.
- * @param unit TimeUnit to use for delay. Default is milliseconds.
+ * Deletes reactions from this message.
+ *
+ * @param delay [Duration] to wait before queueing this action
+ *
+ * @return Empty [Deferred] that resolves when the action is complete
  */
-fun Message.deleteAfter(delay: Long, unit: TimeUnit = TimeUnit.MILLISECONDS) {
-    this.delete().completeAfter(delay, unit)
-}
+fun Message.deleteReactions(delay: Duration = Duration.ZERO): Deferred<Unit> =
+        this.clearReactions() after delay map { Unit }

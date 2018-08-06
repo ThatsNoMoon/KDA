@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Benjamin Scherer
+ * Copyright  2018 Benjamin Scherer
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@ package com.thatsnomoon.kda.entities
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.newFixedThreadPoolContext
 import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.hooks.EventListener
 import net.dv8tion.jda.core.hooks.IEventManager
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CopyOnWriteArraySet
@@ -28,30 +27,29 @@ private val LOG = LoggerFactory.getLogger(KAsyncEventManager::class.java)
 /**
  * Asynchronous JDA event manager using Kotlin coroutines for handling events.
  *
- * @constructor Primary constructor for KAsyncEventManager
- * @param threadCount Thread count for the internal async thread pool for handling events (default: 1).
+ * @param threadCount Thread count for the internal thread pool for handling events (default: core count).
  */
 
-class KAsyncEventManager(threadCount: Int = 1): IEventManager {
+class KAsyncEventManager(threadCount: Int = Runtime.getRuntime().availableProcessors()): IEventManager {
 
-    private val listeners = CopyOnWriteArraySet<EventListener>()
+    private val listeners = CopyOnWriteArraySet<KAsyncEventListener>()
     private val context = newFixedThreadPoolContext(threadCount, "Async-Event-Context")
 
     override fun handle(event: Event) {
-        repeat(listeners.size) { index ->
+        listeners.forEach {
             launch(context) {
                 try {
-                    listeners.elementAt(index).onEvent(event)
-                } catch(t: Throwable) {
-                    LOG.error("An EventListener had an uncaught exception: \n$t\n\tat ${t.stackTrace.joinToString("\n\tat ")}")
+                    it.onEventAsync(event)
+                } catch (t: Throwable) {
+                    LOG.error("A KAsyncEventListener had an uncaught exception: \n$t\n\tat ${t.stackTrace.joinToString("\n\tat ")}")
                 }
             }
         }
     }
 
     override fun register(listener: Any?) {
-        if (listener !is EventListener) {
-            throw IllegalArgumentException("Listener must implement EventListener")
+        if (listener !is KAsyncEventListener) {
+            throw IllegalArgumentException("Listener must implement KAsyncEventListener")
         }
         listeners.add(listener)
     }
