@@ -86,7 +86,6 @@ publishing {
 }
 
 compileKotlin {
-    kotlinOptions.noReflect = "false"
     kotlinOptions.jvmTarget = "1.8"
 }
 compileTestKotlin {
