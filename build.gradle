@@ -44,6 +44,7 @@ repositories {
 dependencies {
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.4'
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:0.23.4'
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'net.dv8tion:JDA:3.7.0_382'
     compile 'org.slf4j:slf4j-api:1.7.25'
 
