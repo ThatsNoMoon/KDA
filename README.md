@@ -1,3 +1,6 @@
+# ⚠ KDA is no longer maintained!
+I'm not interested in maintaining this project and I have not been in a while. Try [Kord](https://github.com/kordlib/kord) or [DiscordKt](https://github.com/DiscordKt/DiscordKt).
+
 # KDA
 A Kotlin library to interface with JDA and increase code readability and cleanliness.
 
